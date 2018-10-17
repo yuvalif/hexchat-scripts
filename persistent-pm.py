@@ -5,6 +5,7 @@ __module_author__ = "Poorchop"
 __module_version__ = "0.1"
 __module_description__ = "Restore previously open private message tabs after launching HexChat"
 
+visited_nicks = {}
 
 def closedialog_cb(word, word_eol, userdata):
     #TODO: check for existing dialogs to same user on other networks
@@ -33,8 +34,11 @@ def loadpm_cb(word, word_eol, userdata):
             saved_network = hexchat.get_pluginpref(pref)
             if saved_network == hexchat.get_info("network"):
                 saved_nick = pref[10:]
-                network_context = hexchat.find_context(channel=saved_network)
-                network_context.command("QUERY {}".format(saved_nick))
+                unique_nick = saved_network + "_" + saved_nick
+                if len(saved_nick) > 1 and unique_nick not in visited_nicks :
+                        visited_nicks[unique_nick] = True
+                        network_context = hexchat.find_context(channel=saved_network)
+                        network_context.command("QUERY {}".format(saved_nick))
 
 
 hexchat.hook_print("Close Context", closedialog_cb)
